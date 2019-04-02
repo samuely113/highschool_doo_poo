@@ -1,0 +1,523 @@
+import java.applet.Applet;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.Timer;
+
+public class Japp extends Applet implements ActionListener, KeyListener {
+
+	Timer t;
+	javaPanel jP;
+	public void init(){
+	setSize(410,300);
+	setFocusable(true);
+	setBackground(Color.black);
+	addKeyListener(this);
+	t = new Timer(20,this);
+	jP = new javaPanel();
+	}
+	public void start(){
+	t.start();	
+	System.out.println("Applet has started");
+	}
+	public void paint(Graphics g){	
+	jP.paint(g);
+	}
+	public void update(){
+	jP.update();
+	}
+	public void keyPressed(KeyEvent e) {
+	jP.keyPressed(e);
+	}
+	public void keyReleased(KeyEvent e) {
+	jP.keyReleased(e);
+	}
+	public void keyTyped(KeyEvent e) {}
+	
+	public void actionPerformed(ActionEvent ae) {
+	repaint();
+	update();
+	}
+	public void stop(){
+	t.stop();
+	System.out.println("Applet has stopped");
+	}
+	public void destroy(){
+	System.out.println("Applet has vanished");
+	}
+	
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import java.awt.*;
+import java.awt.event.KeyEvent;
+import javax.swing.JPanel;
+
+public class javaPanel extends JPanel {
+
+	public int x;
+	public int y;
+	public int xV;
+	moveObjct mo;
+	//keyPlayer kP;
+	Interaction i;
+	public javaPanel(){
+	setDoubleBuffered(true);
+	setFocusable(true);
+	mo = new moveObjct();
+	//kP = new keyPlayer();
+	i = new Interaction();
+	x = 0;
+	y = 0;
+	xV = 0;
+	}
+	public void paint(Graphics g){
+	g.setColor(Color.white);
+	g.drawRect(0, 0, 300, 110);
+	mo.paint(g);
+	//kP.paint(g);
+	i.paint(g);
+	}
+	public void update(){
+	mo.update();
+	//kP.update();
+	i.update();
+	i.checkHits();
+	}
+	public void keyPressed(KeyEvent e) {
+	//kP.keyPressed(e);
+	i.keyPressed(e);
+	}
+	public void keyReleased(KeyEvent e) {
+	//kP.keyReleased(e);
+	i.keyReleased(e);
+	}
+	public void keyTyped(KeyEvent e) {}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import java.awt.*;
+
+public class moveObjct {
+
+	public int x;
+	public int y;
+	public int xV;
+	
+	public moveObjct(){
+	x = 0;
+	y = 0;
+	xV = 0;	
+	}
+	public void paint(Graphics g){
+	g.setColor(Color.red);
+	g.fillRect(x, y, 10, 10);
+	}
+	public void update(){
+	x += xV;
+	if (x <= 0){
+	xV = 1;
+	}else if ( x >= 290){
+	xV = -1;
+	}
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import java.awt.*;
+import java.awt.event.KeyEvent;
+
+public class Interaction {
+	keyPlayer kP;
+	Object o;
+	public int verHitABV;
+	public int verHitBLW;
+	public boolean horHitLFT;
+	public boolean horHitRGHT;
+	public Interaction(){
+	kP = new keyPlayer();
+	o = new Object();
+	verHitABV = 0;
+	verHitBLW = 0;
+	horHitLFT = false;
+	horHitRGHT = false;
+	}
+	public void checkHits(){
+	if (kP.getPlayerRec().getBounds2D().intersects(o.getObjectUp().getBounds2D()) && (kP.getPlayerRec().getBounds2D().intersects(o.getObject().getBounds2D()))){
+	System.out.println("HITTING YELLOW BOX AND PURPLE BOX");
+	kP.setGround(o.getY() - 10);
+	kP.setY(o.getY() - 10);
+	}else if (kP.getPlayerRec().getBounds2D().intersects(o.getObjectDown().getBounds2D())){
+	System.out.println("HITTING GREEN BOX");
+	kP.setCeiling(95);
+	if (kP.getPlayerRec().getBounds2D().intersects(o.getObject().getBounds2D())){
+	System.out.println("HITTING YELLOW  BOX");
+	kP.setCeiling(95);
+	kP.setY(95);
+	}
+	}else {
+	kP.setCeiling(0);
+	kP.setGround(100);
+	}
+	}
+	public void paint(Graphics g){
+	
+	o.paint(g);
+	kP.paint(g);
+	}
+	public void update(){
+	kP.update();
+	System.out.println(kP.getyV());
+	//System.out.println(kP.getgrav());
+	}
+	public void keyPressed(KeyEvent e) {
+	kP.keyPressed(e);
+	}
+	public void keyReleased(KeyEvent e) {
+	kP.keyReleased(e);
+	}
+	public void keyTyped(KeyEvent e) {}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import java.awt.*;
+import java.awt.event.*;
+
+public class keyPlayer implements KeyListener {
+	
+	public int x;
+	public int y;
+	public int h;
+	public int xV;
+	public int yV;
+	public int ground;
+	public int ceiling;
+	public int in_air;
+	public Rectangle PlayerRec;
+	
+	public keyPlayer(){
+	x = 0;
+	y = 100;
+	ground = 100;
+	ceiling = 0;
+	h = y + 10;
+	xV = 0;
+	yV = 0;
+	in_air = 0;
+	PlayerRec = new Rectangle(x,y,10,10);
+	}
+	
+	public Rectangle getPlayerBounds(){
+	return PlayerRec.getBounds();	
+	}
+	public void paint(Graphics g){
+	g.setColor(Color.cyan);
+	g.fillRect(x, y, 10, 10);
+	}
+	public void update(){
+	x += xV;
+	y -= yV;
+	yV -= 1;
+	if (yV >=  10){
+	yV = 10;
+	}
+	if ( x <= 0){
+	x = 0;
+	}else if (x >= 290){
+	x = 290;
+	}
+	if (y <= ceiling){
+	y = ceiling;
+	}
+	if (y >= ground ){
+	y = ground;
+	yV = 0;
+	in_air = 0;
+	}
+	}
+	
+	public void keyPressed(KeyEvent e) {
+	int key = e.getKeyCode();
+	if (key == KeyEvent.VK_RIGHT){
+	xV = 2;
+	}else if (key == KeyEvent.VK_LEFT){
+	xV = -2;
+	}
+	if (key == KeyEvent.VK_UP && (in_air == 0)){
+	yV = 10;
+	in_air = 1;
+	System.out.println("JUMPED");
+	e.consume();
+	}else if ((key == KeyEvent.VK_UP && (in_air == 1))){
+	System.out.println("SHOULDN'T BE ABLE TO JUMP");
+	e.consume();
+	}
+	}
+	
+	public void keyReleased(KeyEvent e) {
+	int key = e.getKeyCode();
+	if (key == KeyEvent.VK_RIGHT){
+	xV = 0;
+	}else if (key == KeyEvent.VK_LEFT){
+	xV = 0;
+	}
+	if (key == KeyEvent.VK_UP){
+	yV = 0;
+	e.consume();
+	}	
+	}
+	
+	public void keyTyped(KeyEvent e) {}
+	
+	public Rectangle getPlayerRec(){
+	return new Rectangle(x,y,10,10);	
+	}
+	public void setCeiling(int ceiling){
+	this.ceiling = ceiling;
+	}
+	public void setGround(int ground){
+	this.ground = ground;
+	}
+	public void setIn_air(int in_air){
+	this.in_air = in_air;
+	}
+	public int getMaxX(){
+	return(x + 10);
+	}
+	public int getMaxY(){
+	return (y + 10);
+	}
+	public int getX(){
+	return x;
+	}
+	public void setX(int x){
+	this.x = x;
+	}
+	public int getY(){
+	return y;
+	}
+	public void setY(int y){
+	this.y = y;
+	}
+	public int getyV(){
+	return yV;
+	}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+
+
+public class Object<block> {
+
+	public int x;
+	public int y;
+	public Rectangle obRec;
+	public Rectangle obRecUp;
+	public Rectangle obRecDown;
+	public Rectangle obRecLeft;
+	public Rectangle obRecRight;
+	
+	public Object(){
+	x = 180;
+	y = 85;
+	obRec = new Rectangle(x,y,100, 10);
+	obRecUp = new Rectangle(x,(y - 10),100, 15);
+	obRecDown = new Rectangle(x,(y + 15),100, 25);
+	obRecLeft = new Rectangle((x - 10),y,10, 10);
+	obRecRight = new Rectangle((x + 100),y,10, 10);
+	}
+	public void paint(Graphics g){
+	g.setColor(Color.yellow);
+	g.fillRect(x, y, 100, 10);
+	g.fillRect(250, 60, 100, 10);
+	g.setColor(Color.magenta);
+	g.drawRect(180, 75, 100, 15  );
+	g.setColor(Color.green);
+	g.drawRect(180, (y + 5), 100, 15  );
+	g.drawRect(170, 85, 10, 10  );
+	g.drawRect(280, 85, 10, 10  );
+	}
+	
+	public Rectangle getObject(){
+	return obRec;	
+	}
+	public Rectangle getObjectUp(){
+	return obRecUp;	
+	}
+	public Rectangle getObjectDown(){
+	return obRecDown;	
+	}
+	public Rectangle getObjectLeft(){
+	return obRecLeft;	
+	}
+	public Rectangle getObjectRight(){
+	return obRecRight;	
+	}
+	public int getMaxX(){
+	return (x + 100);	
+	}
+	public int getMaxY(){
+	return (y + 10);	
+	}
+	public int getX(){
+	return x;
+	}
+	public void setX(int x){
+	this.x = x;
+	}
+	public int getY(){
+	return y;
+	}
+	public void setY(int y){
+	this.y = y;
+	} 
+}
